@@ -23,7 +23,7 @@ jobs:
           test -f index.html
           echo "index.html found successfully!"
 
-      - name: Simulate Build
+      - name: Build Static Website
         run: |
           echo "Building static website..."
           mkdir -p build
@@ -35,3 +35,19 @@ jobs:
           echo "Build contents:"
           ls -la build
           echo "CI pipeline completed successfully!"
+
+      - name: Send Success Notification
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Content-type: application/json" \
+            --data '{"text":"✅ CI Pipeline SUCCESS for devops-webapp! Build completed successfully."}' \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
+
+      - name: Send Failure Notification
+        if: failure()
+        run: |
+          curl -X POST \
+            -H "Content-type: application/json" \
+            --data '{"text":"❌ CI Pipeline FAILED for devops-webapp. Please check GitHub Actions logs."}' \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
